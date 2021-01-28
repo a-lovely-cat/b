@@ -8,6 +8,7 @@ SERVER_PORT = 1337
 PING_MESSAGE_VALUE = 'ping'.encode()
 PONG_MESSAGE_VALUE = 'pong'.encode()
 
+TIMEOUT = float(5)
 MAX_RECEIVE_AMOUNT = 15000
 
 
