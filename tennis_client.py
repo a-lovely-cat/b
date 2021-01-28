@@ -1,30 +1,42 @@
 """
 name: tennis_client.py
-purpose: handler a single tennis connection's actions with select
+purpose: handles all the connections of ping pong clients
 """
 import select
 import consts
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
-class TennisClient:
+class TennisServer:
 
-    def __init__(self, client_socket):
-        self.client_socket = client_socket
+    def __init__(self, server_socket):
+        self.server_socket = server_socket
+        self.client_sockets = {}
 
-    def get_ping(self):
+    def get_pings(self):
         """
-        this function uses select to get the client's ping when possible
-        :except ValueError: in the case when there is a timeout or a bad message (not ping)
+        this function recieves pings and sends pongs to all clients available
         """
-        select.select([self.client_socket], [], [])
-        client_answer = self.client_socket.recv(consts.MAX_RECEIVE_AMOUNT)
-        if client_answer != consts.PING_MESSAGE_VALUE:
-            raise ValueError(consts.ErrorMessages.INVALID_MESSAGE_ERROR_MESSAGE)
+        for sock in select.select([*self.client_sockets.keys()], [], [], consts.TIMEOUT)[0]:
+            client_answer = sock.recv(consts.MAX_RECEIVE_AMOUNT)
+            if client_answer != consts.PING_MESSAGE_VALUE:
+                logging.error(f'{self.client_sockets[sock]} has been disconnected')
+                del self.client_sockets[sock]
+                sock.close()
+            else:
+                sock.send(consts.PONG_MESSAGE_VALUE)
 
-    def send_pong(self):
+    def accept_client(self):
         """
-        this function sends the client a pong when he can accept it
-        :except ValueError: in the case when there is a timeout
+        this function uses select to only accept the client when possible
+        it adds them to the list
         """
-        select.select([], [self.client_socket], [])
-        self.client_socket.send(consts.PONG_MESSAGE_VALUE)
+        if self.client_sockets == {}:
+            client_socket, client_address = self.server_socket.accept()
+            self.client_sockets[client_socket] = client_address
+
+        for sock in select.select([self.server_socket], [], [], 0)[0]:
+            client_socket, client_address = sock.accept()
+            self.client_sockets[client_socket] = client_address
