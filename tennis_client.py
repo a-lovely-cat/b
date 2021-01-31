@@ -5,6 +5,7 @@ purpose: handles all the connections of ping pong clients
 import select
 import consts
 import logging
+import time
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -37,6 +38,9 @@ class TennisServer:
             client_socket, client_address = self.server_socket.accept()
             self.client_sockets[client_socket] = client_address
 
-        for sock in select.select([self.server_socket], [], [], 0)[0]:
-            client_socket, client_address = sock.accept()
+        time.sleep(0.1)
+        while select.select([self.server_socket], [], [], 0)[0] != []:
+            print(1)
+            client_socket, client_address = self.server_socket.accept()
             self.client_sockets[client_socket] = client_address
+            time.sleep(0.13)
