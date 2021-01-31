@@ -18,6 +18,7 @@ def ping_pong(server_socket):
     tennis_server = TennisServer(server_socket)
 
     while True:
+        logging.info(f'accepting clients')
         tennis_server.accept_client()
 
         logging.info(f'ping ponging')
@@ -28,7 +29,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.bind((consts.SERVER_IP, consts.SERVER_PORT))
-    server_socket.listen(4)
+    server_socket.listen(5)
 
     ping_pong(server_socket)
 
