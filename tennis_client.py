@@ -23,11 +23,12 @@ class TennisServer:
         this function recieves pings and sends pongs to all clients available
         """
         for sock in self.clients_poll.poll():
-            client_answer = None
             if sock[1] == select.POLLIN:
                 client_sock = socket.socket(fileno=sock[0])
                 client_answer = client_sock.recv(consts.MAX_RECEIVE_AMOUNT)
-            if client_answer != consts.PING_MESSAGE_VALUE and client_answer is not None:
+            else:
+                continue
+            if client_answer != consts.PING_MESSAGE_VALUE:
                 logging.error(f'{self.client_sockets[sock]} has been disconnected')
                 del self.client_sockets[sock]
                 self.clients_poll.unregister(sock[0])
@@ -50,4 +51,4 @@ class TennisServer:
             client_socket, client_address = self.server_socket.accept()
             self.client_sockets[client_socket] = client_address
             self.clients_poll.register(client_socket)
-            time.sleep(0.13)
+            time.sleep(0.2)
