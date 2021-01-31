@@ -4,7 +4,6 @@ purpose: ping pong :)
 """
 import socket
 import logging
-
 import consts
 from tennis_client import TennisServer
 
