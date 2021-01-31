@@ -15,12 +15,13 @@ class TennisServer:
     def __init__(self, server_socket):
         self.server_socket = server_socket
         self.client_sockets = {}
+        self.clients_poll = select.poll()
 
     def get_pings(self):
         """
         this function recieves pings and sends pongs to all clients available
         """
-        for sock in select.select([*self.client_sockets.keys()], [], [], consts.TIMEOUT)[0]:
+        for sock in self.clients_poll.poll():
             client_answer = sock.recv(consts.MAX_RECEIVE_AMOUNT)
             if client_answer != consts.PING_MESSAGE_VALUE:
                 logging.error(f'{self.client_sockets[sock]} has been disconnected')
@@ -40,7 +41,7 @@ class TennisServer:
 
         time.sleep(0.1)
         while select.select([self.server_socket], [], [], 0)[0] != []:
-            print(1)
             client_socket, client_address = self.server_socket.accept()
             self.client_sockets[client_socket] = client_address
+            self.clients_poll.register(client_socket)
             time.sleep(0.13)
